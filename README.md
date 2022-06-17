@@ -1,2 +1,2 @@
-# Dawn-of-Intelligence
-A repository holding all of the source material to be used for creating a network of HTML5 apps, 3D scenes, and videos.
+# Dawn of Intelligence - Interactive Web Apps
+A repository of HTML5 web apps that will be used as source material for producing videos, while also letting viewers interact the the source material.
