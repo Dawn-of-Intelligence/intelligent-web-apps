@@ -1,0 +1,53 @@
+.Navigation-container {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+}
+
+.Navigation-window {
+  background-color: #333;
+  color: white;
+  position: relative;
+  width: 300px;
+  border-width: 1px;
+  border-style: dotted;
+  border-color: #CCC;
+}
+
+.Navigation-top {
+  display: flex;
+  width: 100%;
+}
+
+.Navigation-top-button {
+  width: 60px;
+}
+.Navigation-top-search-container {
+  position: relative;
+  left:  10px;
+}
+.Navigation-top-search-input {
+  position: relative;
+  width:  230px;
+}
+.Navigation-top-search-input-field {
+  width: 100%;
+}
+
+.Navigation-link:link {
+  color: white;
+}
+.Navigation-link:visited {
+  color: white;
+}
+.Navigation-link:hover {
+  color: #59f;
+}
+.Navigation-link:active {
+  color: #24a;
+}
+
+.Navigation-no-results-found {
+  text-align: center;
+  padding-bottom: 10px;
+}

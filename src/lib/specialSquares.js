@@ -164,6 +164,9 @@ function findSpecialPronics(pronicScale, isScaleMultiplication, offset, maxItter
     const squareRootScaledPronic = Math.sqrt(pronicScaledWithOffset);
     if(Math.ceil(squareRootScaledPronic) === squareRootScaledPronic){
 
+      const triangularTimesEightPlusOne = (i * (i+1) * 4 + 1);
+      const scalarRatioIfMultiplied = pronicScaledWithOffset / triangularTimesEightPlusOne;
+
       const loopObject = {
         iteration : i,
         pronicFactors: `{${i} x ${i+1}}`,
@@ -172,6 +175,8 @@ function findSpecialPronics(pronicScale, isScaleMultiplication, offset, maxItter
         offset,
         pronicScaledWithOffset,
         squareRootScaledPronic,
+        triangularTimesEightPlusOne,
+        ratioPronicScaledToTriangularTimesEightPlusOne: isScaleMultiplication ? scalarRatioIfMultiplied : 1 / scalarRatioIfMultiplied,
       };
 
       const pronicFactorOneSqrt = Math.sqrt(i);
@@ -191,7 +196,7 @@ function findSpecialPronics(pronicScale, isScaleMultiplication, offset, maxItter
       }
 
       if(thePronicFactorWithPerfectSquare) {
-        loopObject.ratioOfRootAndPronicFactor = squareRootScaledPronic / thePronicFactorWithPerfectSquare;
+        loopObject.ratioOfRootAndPronicFactor = isScaleMultiplication ? squareRootScaledPronic / thePronicFactorWithPerfectSquare : thePronicFactorWithPerfectSquare / squareRootScaledPronic;
       } else {
         loopObject.ratioOfRootAndPronicFactor = null;
       }
