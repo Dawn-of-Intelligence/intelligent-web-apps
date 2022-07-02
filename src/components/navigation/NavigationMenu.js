@@ -21,11 +21,11 @@ const NavigationMenu = (props) => {
 		cancel: isFirstTimeViewing,
 		from: {
 			opacity: 0,
-			left: isNavOpen ? '-300px' : '0px',
+			left: isNavOpen ? '-320px' : '0px',
 		},
 		to: {
 			opacity: 1,
-			left: isNavOpen ? '0px' : '-310px',
+			left: isNavOpen ? '0px' : '-320px',
 		},
 	})
 	const springPropsSearch = useSpring({
