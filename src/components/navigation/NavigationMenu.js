@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useSpring, animated } from 'react-spring'
+import { useSpring, animated } from '@react-spring/web'
 import './NavigationMenu.css';
 import { Link } from 'react-router-dom'
 
@@ -8,7 +8,6 @@ const NavigationMenu = (props) => {
 	const [isNavOpen, setIsNavOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [isFirstTimeViewing, setIsFirstTimeViewing] = useState(true);
-
 	const navEntries = [
 		{ title: 'Home', location: '/' },
 		{ title: `A Flaw in Math's Crown Jewel`, location: '/flaw-in-maths-crown-jewel' },
@@ -56,7 +55,6 @@ const NavigationMenu = (props) => {
 		};
 	}, [outsideClickRef, setIsNavOpen]);
 
-
 	return (
 		<div className="Navigation-container" ref={outsideClickRef}>
 
@@ -81,7 +79,7 @@ const NavigationMenu = (props) => {
 					</animated.div>
 				</div>
 			</div>
-			<div style={{position: 'absolute'}}>
+			<div className="Navigation-menu-container">
 				<animated.nav style={springPropsMenu} className="Navigation-window">
 					<ul>
 						{
@@ -91,7 +89,6 @@ const NavigationMenu = (props) => {
 								</li>
 							))
 						}
-
 					</ul>
 					{!filteredNavEntriesBySearchTerm().length && searchTerm && (
 						<div className="Navigation-no-results-found">No Results</div>
