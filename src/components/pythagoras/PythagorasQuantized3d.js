@@ -1,28 +1,9 @@
 import React, { useState, useRef } from 'react'
-import { Canvas, useFrame, extend, useThree } from '@react-three/fiber'
+import { Canvas } from '@react-three/fiber'
 import { useSpring, animated } from '@react-spring/three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import * as THREE from 'three'
 import './PythagorasQuantized.css'
-// import { useHelper } from '@react-three/drei'
+import { /* useHelper, */ OrbitControls } from '@react-three/drei'
 import TheJewel from './TheJewel'
-
-extend({ OrbitControls });
-
-const Controls = () => {
-  const orbitRef = useRef()
-  const { camera, gl } = useThree()
-  useFrame(() => {
-    orbitRef.current.update()
-  })
-  return (<orbitControls 
-    autoRotate
-    // maxPolarAngle={Math.PI / 3}
-    // minPolarAngle={Math.PI / 3}
-    args={[camera, gl.domElement]}
-    ref={orbitRef} />
-  )
-};
 
 const Plane = () => (
   <mesh
@@ -68,11 +49,10 @@ const QuantumBlock = (props) => {
 const SceneLights = () => {
   const spotLightRef = useRef()
   // useHelper(spotLightRef, THREE.SpotLightHelper, 'red')
-
   return (
     <>
       <ambientLight intensity={0.5} />
-      <spotLight position={[-4, 7, -4]} intensity={0.5} penumbra={1} castShadow ref={spotLightRef} />
+      <spotLight position={[-4, 7, -4]} intensity={5.5} penumbra={1} castShadow ref={spotLightRef} />
       <hemisphereLight args={[0xffffff, 0x080820, 1]} />
     </>
   )
@@ -87,14 +67,19 @@ const PythagorasQuantized3d = ({
   return (
     <Canvas
       className="Pythagoras-container-3d"
-      onCreated={({gl}) => {
-        gl.shadowMap.enabled = true
-        gl.shadowMap.type = THREE.PCFSoftShadowMap
-    }}>
+      shadows
+    >
       <fog attach="fog" args={['white', 50, 120]} />    
       <SceneLights />
       <TheJewel />
-      <Controls />
+      <OrbitControls
+        autoRotate
+        maxPolarAngle={Math.PI / 2.25}
+        // minPolarAngle={Math.PI / 3}
+        enableDamping
+        dampingFactor = {0.1}
+        enablePan={true}
+       />
       <QuantumBlock position={[1, 0, 0]}  />
       <QuantumBlock position={[2, 0, 0]}  />
       <QuantumBlock position={[3, 0, 0]}  />
