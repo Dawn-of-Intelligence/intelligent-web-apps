@@ -3,12 +3,14 @@ import { useLoader } from '@react-three/fiber'
 // import { useSpring, animated } from '@react-spring/three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import * as THREE from 'three'
-// import { useHelper } from '@react-three/drei'
+import { /* useHelper, */ useCursor, Edges } from '@react-three/drei'
 
 const TheJewel = () => {
 
   const { nodes, materials } = useLoader(GLTFLoader, "/models/emerald.glb")
   const [isHovered, setIsHovered] = useState(false)
+
+  useCursor(isHovered, 'pointer')
 
   const spotlightColor = isHovered ? 0xffffff : 0xffffff
 
@@ -105,9 +107,19 @@ const TheJewel = () => {
           position={[0, -0.6, 0]}
           geometry={nodes.emerald_mesh.geometry}
           material={materials.Jewel1}
-          onPointerOver={() => setIsHovered(true)}
+          onPointerOver={(e) => {
+            e.stopPropagation()
+            setIsHovered(true)
+          }}
           onPointerOut={() => setIsHovered(false)}
-        />
+        >
+          <Edges
+            visible={isHovered}
+            scale={1}
+            threshold={5} // Display edges only when the angle between two faces exceeds this value (default=15 degrees)
+            color="white"
+          />
+        </mesh>
       </group>
     </>
   )
