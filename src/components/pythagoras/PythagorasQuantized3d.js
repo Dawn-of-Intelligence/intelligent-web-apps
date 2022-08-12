@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { useSpring, animated } from '@react-spring/three'
 import './PythagorasQuantized.css'
@@ -25,6 +25,7 @@ const CathetOrthogonal = ({isPointingUp, length}) => {
           position={[(isPointingUp ? (cathetNumber + 1) : 0), 0, (!isPointingUp ? (cathetNumber + 1) : 0)]}
           baseColor={cathetNumber % 2 === 0 ? '#CCC' : '#ABE'}
           hoverColor={cathetNumber % 2 === 0 ? 'hotpink' : 'teal'}
+          delay={600 * cathetNumber}
         />)
       }
     </>
@@ -40,6 +41,7 @@ const HypotenuseOrthogonal = ({length}) => {
           position={[length - hypotenuseNumber -1, 0, hypotenuseNumber ]}
           baseColor={'#F66'}
           hoverColor={'#900'}
+          delay={400 * hypotenuseNumber}
         />)
       }
     </>
@@ -66,6 +68,7 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
           position={[xCoord, 0, yCoord]}
           baseColor={isOnShorterLayer ? '#FF6' : '#FA4'}
           hoverColor={isOnShorterLayer ? '#637' : '#835'}
+          delay={80 * blockCounter}
         />
       )
 
@@ -105,6 +108,7 @@ const PronicSquareOrthogonal = ({isPointingUp, length}) => {
             position={[getCoordinateX(blockNumber), 0, getCoordinateY(blockNumber)]}
             baseColor={blockNumber % 2 === 0 ? '#66A' : '#369'}
             hoverColor={blockNumber % 2 === 0 ? 'hotpink' : '#F63'}
+            delay={160 * blockNumber}
           />)
         }
       )}
@@ -116,11 +120,36 @@ const QuantumBlock = (props) => {
   const [isHovered, setIsHovered] = useState(false)
   const [isActive, setIsActive] = useState(false)
   const meshRef = useRef()
-  const springProps = useSpring({
-    scale: isActive ? [0.7, 0.7, 0.7] : [1, 1, 1],
+  const [delayFinished, setDelayFinished] = useState(false);
+  const animateDurationAfterDelay = 300
+
+  useEffect(()=> {
+    const delayMillis = props.delay ? props.delay + animateDurationAfterDelay : 0
+
+    let delayTimer = setTimeout(() => {
+      setDelayFinished(true)
+    }, delayMillis)
+    return () => {
+      clearTimeout(delayTimer);
+    }
+  }, [props.delay])
+
+  const colorProps = useSpring({
     color: isHovered ? props.hoverColor : props.baseColor,
   })
- 
+
+  const scalePropsAfterDelay = useSpring({
+    scale: isActive ? [0.7, 0.7, 0.7] : [1, 1, 1],
+  })
+  const scalePropsBeforeDelay = useSpring({
+    delay: props.delay,
+    config: { duration: animateDurationAfterDelay },
+    from: { scale: [0, 0, 0] },
+    to: { scale: [1, 1, 1] },
+  })
+
+  const scaleProps = delayFinished ? scalePropsAfterDelay : scalePropsBeforeDelay
+
   return (
     <animated.mesh
       {...props}
@@ -134,14 +163,14 @@ const QuantumBlock = (props) => {
         e.stopPropagation()
         setIsActive(!isActive)
       }}
-      scale={springProps.scale}
-      castShadow
+      scale={scaleProps.scale}
+      // castShadow
     >
       <boxBufferGeometry
         args={[1, 1, 1]}
       />
       <animated.meshMatcapMaterial
-        color={springProps.color}
+        color={colorProps.color}
       />
     </animated.mesh>
   )
@@ -153,7 +182,7 @@ const SceneLights = () => {
   return (
     <>
       <ambientLight intensity={0.5} />
-      <spotLight position={[-4, 7, -4]} intensity={5.5} penumbra={1} castShadow ref={spotLightRef} />
+      <spotLight position={[-4, 7, -4]} intensity={5.5} penumbra={1} /*castShadow*/ ref={spotLightRef} />
       <hemisphereLight args={[0xffffff, 0x080820, 1]} />
     </>
   )
@@ -165,12 +194,13 @@ const PythagorasQuantized3d = ({
   isDiagonalHypotenuse,
 }) => {
 
-  const hypotenuseLength = 7
+  const hypotenuseLength = 5
 
   return (
     <Canvas
       className="Pythagoras-container-3d"
-      shadows
+      camera={{ fov: 75, position: [0, 10, 0] }}
+      // shadows
     >
       <fog attach="fog" args={['white', 50, 120]} />    
       <SceneLights />
