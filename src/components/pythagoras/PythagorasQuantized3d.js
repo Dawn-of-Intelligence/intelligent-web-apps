@@ -16,33 +16,37 @@ const Plane = () => (
   </mesh>
 )
 
-const CathetOrthogonal = ({isPointingUp, length}) => {
+const CathetOrthogonal = ({isPointingUp, hypotenuseLength}) => {
+  if(hypotenuseLength < 2)
+    return null
   return (
     <>
-      {[...Array(length -2)].map((_, cathetNumber) =>
+      {[...Array(hypotenuseLength -2)].map((_, cathetNumber) =>
         <QuantumBlock
-          key={'cathet' + cathetNumber + isPointingUp ? 'y' : 'n'}
+          key={'cathet' + cathetNumber + (isPointingUp ? 'y' : 'n') + 'length' + hypotenuseLength}
           position={[(isPointingUp ? (cathetNumber + 1) : 0), 0, (!isPointingUp ? (cathetNumber + 1) : 0)]}
           baseColor={cathetNumber % 2 === 0 ? '#CCC' : '#ABE'}
           hoverColor={cathetNumber % 2 === 0 ? 'hotpink' : 'teal'}
           delay={600 * cathetNumber}
-        />)
+        />
+        )
       }
     </>
   )
 }
 
-const HypotenuseOrthogonal = ({length}) => {
+const HypotenuseOrthogonal = ({hypotenuseLength}) => {
   return (
     <>
-      {[...Array(length)].map((_, hypotenuseNumber) =>
+      {[...Array(hypotenuseLength)].map((_, hypNum) =>
         <QuantumBlock
-          key={'hypotenuse' + hypotenuseNumber}
-          position={[length - hypotenuseNumber -1, 0, hypotenuseNumber ]}
+          key={'hypotenuse' + hypNum + 'length' + hypotenuseLength}
+          position={[hypotenuseLength - hypNum -1, 0, hypNum ]}
           baseColor={'#F66'}
           hoverColor={'#900'}
-          delay={400 * hypotenuseNumber}
-        />)
+          delay={400 * hypNum}
+       />
+        )
       }
     </>
   )
@@ -61,10 +65,9 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
   for(let hypotenuseLayer = 0; hypotenuseLayer < doubleStackedHypotenuseLength; hypotenuseLayer++){
     let currentDiagonalLength = (isOnShorterLayer ? hypotenuseLength - 1 : hypotenuseLength);
     for(let currentDiagonal = 1; currentDiagonal <= currentDiagonalLength; currentDiagonal++) {
-
       quantumBlocksArr.push(
         <QuantumBlock
-          key={'c^2' + blockCounter}
+          key={'c2' + blockCounter + 'hyp' + hypotenuseLength}
           position={[xCoord, 0, yCoord]}
           baseColor={isOnShorterLayer ? '#FF6' : '#FA4'}
           hoverColor={isOnShorterLayer ? '#637' : '#835'}
@@ -95,23 +98,24 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
   return <>{quantumBlocksArr}</>
 }
 
-const PronicSquareOrthogonal = ({isPointingUp, length}) => {
-  const totalBlocks = length * (length -1)
-  const getColumnNumFromBlockNum = (blckNum) => Math.floor(blckNum / length)
-  const getCoordinateX = (blckNum) => isPointingUp ? (getColumnNumFromBlockNum(blckNum) * -1 - 1) : (blckNum - getColumnNumFromBlockNum(blckNum) * length)
-  const getCoordinateY = (blckNum) => isPointingUp ? (blckNum - getColumnNumFromBlockNum(blckNum) * length) : (getColumnNumFromBlockNum(blckNum) * -1 - 1)
+const PronicSquareOrthogonal = ({isPointingUp, hypotenuseLength}) => {
+  const totalBlocks = hypotenuseLength * (hypotenuseLength -1)
+  const getColumnNumFromBlockNum = (blckNum) => Math.floor(blckNum / hypotenuseLength)
+  const getCoordinateX = (blckNum) => isPointingUp ? (getColumnNumFromBlockNum(blckNum) * -1 - 1) : (blckNum - getColumnNumFromBlockNum(blckNum) * hypotenuseLength)
+  const getCoordinateY = (blckNum) => isPointingUp ? (blckNum - getColumnNumFromBlockNum(blckNum) * hypotenuseLength) : (getColumnNumFromBlockNum(blckNum) * -1 - 1)
+  
   return (
     <>
-      {[...Array(totalBlocks)].map((_, blockNumber) => {
-          return (<QuantumBlock
-            key={'Pronic' + blockNumber + isPointingUp ? 'y' : 'n'}
-            position={[getCoordinateX(blockNumber), 0, getCoordinateY(blockNumber)]}
-            baseColor={blockNumber % 2 === 0 ? '#66A' : '#369'}
-            hoverColor={blockNumber % 2 === 0 ? 'hotpink' : '#F63'}
-            delay={160 * blockNumber}
-          />)
-        }
-      )}
+      {[...Array(totalBlocks)].map((_, blockNumber) =>
+        <QuantumBlock
+          key={'Pronic' + blockNumber + (isPointingUp ? 'y' : 'n') + 'totalBlocks' + totalBlocks}
+          position={[getCoordinateX(blockNumber), 0, getCoordinateY(blockNumber)]}
+          baseColor={blockNumber % 2 === 0 ? '#66A' : '#369'}
+          hoverColor={blockNumber % 2 === 0 ? 'hotpink' : '#F63'}
+          delay={160 * blockNumber}
+        />
+        )
+      }
     </>
   )
 }
@@ -189,12 +193,11 @@ const SceneLights = () => {
 }
 
 const PythagorasQuantized3d = ({
-  // hypotenuseLength,
+  hypotenuseLength,
   isBluntCorners,
   isDiagonalHypotenuse,
 }) => {
-
-  const hypotenuseLength = 5
+  hypotenuseLength = parseInt(hypotenuseLength);
 
   return (
     <Canvas
@@ -215,11 +218,11 @@ const PythagorasQuantized3d = ({
        />
 
 
-      <HypotenuseOrthogonal length={hypotenuseLength} />
-      <CathetOrthogonal isPointingUp={true} length={hypotenuseLength} />
-      <CathetOrthogonal isPointingUp={false} length={hypotenuseLength} />
-      <PronicSquareOrthogonal isPointingUp={true} length={hypotenuseLength} />
-      <PronicSquareOrthogonal isPointingUp={false} length={hypotenuseLength} />
+      <HypotenuseOrthogonal hypotenuseLength={hypotenuseLength} />
+      <CathetOrthogonal isPointingUp={true} hypotenuseLength={hypotenuseLength} />
+      <CathetOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
+      <PronicSquareOrthogonal isPointingUp={true} hypotenuseLength={hypotenuseLength} />
+      <PronicSquareOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
       <FourtyFiveDegreeSquare hypotenuseLength={hypotenuseLength} />
       <Plane />
     </Canvas>

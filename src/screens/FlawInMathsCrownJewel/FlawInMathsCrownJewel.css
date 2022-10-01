@@ -29,9 +29,12 @@
   color: black;
 }
 
-
 .Pythagorean-pronics {
   background-color: #282c34;
   height: 120vh;
   color: white;
+}
+
+.stats {
+  left: 320px !important;
 }
