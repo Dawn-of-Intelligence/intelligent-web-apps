@@ -54,7 +54,7 @@ const HypotenuseOrthogonal = ({hypotenuseLength}) => {
 }
 
 const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
-  const quantumBlocksArr = [];
+  const quantumBlocksComponentArr = [];
 
   // Consider that each diagonal is a 2-for-1 which has an odd/even layer double stacked.
   const doubleStackedHypotenuseLength = hypotenuseLength + hypotenuseLength - 1
@@ -66,7 +66,7 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
   for(let hypotenuseLayer = 0; hypotenuseLayer < doubleStackedHypotenuseLength; hypotenuseLayer++){
     let currentDiagonalLength = (isOnShorterLayer ? hypotenuseLength - 1 : hypotenuseLength);
     for(let currentDiagonal = 1; currentDiagonal <= currentDiagonalLength; currentDiagonal++) {
-      quantumBlocksArr.push(
+      quantumBlocksComponentArr.push(
         <QuantumBlock
           key={'c2' + blockCounter + 'hyp' + hypotenuseLength}
           position={[xCoord, 0, yCoord]}
@@ -96,7 +96,7 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
     }
   }
 
-  return <>{quantumBlocksArr}</>
+  return <>{quantumBlocksComponentArr}</>
 }
 
 const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
@@ -113,28 +113,44 @@ const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
     animationStartTimeRef.current = Date.now()
   }, [hypotenuseLength])
 
-  const quantumBlocksArr = [];
-
   // Ahhhhhh, the Quantum Pythagorean Theorem !!!!!!!!!
   const totalBlocks = hypotenuseLength * (hypotenuseLength - 1) * 2;
 
   // Consider that each diagonal is a 2-for-1 which has an odd/even layer double stacked.
   const doubleStackedHypotenuseLength = hypotenuseLength + hypotenuseLength - 1
 
-  let xCoord = hypotenuseLength -1;
-  let yCoord = 1;
-  let isOnShorterLayer = true;
+  let xCoord = hypotenuseLength -1
+  let yCoord = 1
+  let isOnShorterLayer = true
+  let colorBrickOffset = 0
+  let blockCounter = 1
+
+  const fourtyFiveBlocksArr = [];
 
   for(let hypotenuseLayer = 0; hypotenuseLayer < doubleStackedHypotenuseLength; hypotenuseLayer++){
     let currentDiagonalLength = (isOnShorterLayer ? hypotenuseLength - 1 : hypotenuseLength);
     for(let currentDiagonal = 1; currentDiagonal <= currentDiagonalLength; currentDiagonal++) {
 
-      quantumBlocksArr.push(
+      let isOnOppositeQuadrant
+      // Figure out how many bricks to skip at the START and END of drawing a diagonal line.
+      if(currentDiagonal <= colorBrickOffset || (currentDiagonalLength - currentDiagonal) < colorBrickOffset)
+        isOnOppositeQuadrant = false
+      else
+        isOnOppositeQuadrant = true
+
+      // The number of bricks "skipped" from the Start/End edges inverts past the half way point.
+      // At first you start skipping and additional brick and the tail/end of the diagonal after rounding a short diagonal.
+      // Past half way you start decrementing the number of bricks to skip after rounding a long diagonal.
+      if(isOnShorterLayer && currentDiagonal === currentDiagonalLength && blockCounter < totalBlocks / 2)
+        colorBrickOffset++
+      if(!isOnShorterLayer && currentDiagonal === currentDiagonalLength && blockCounter > totalBlocks / 2)
+        colorBrickOffset--
+
+      fourtyFiveBlocksArr.push(
         {
           xCoord,
           yCoord,
-          baseColor: isOnShorterLayer ? '#FF6' : '#FA4',
-          hoverColor: isOnShorterLayer ? '#637' : '#835',
+          isOnOppositeQuadrant,
         }
       )
 
@@ -153,10 +169,13 @@ const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
       if(currentDiagonal === currentDiagonalLength) {
         isOnShorterLayer = !isOnShorterLayer
       }
+
+      blockCounter++
     }
   }
 
-  const instanceRef = useRef()
+  const instanceRefOdd = useRef()
+  const instanceRefEven = useRef()
   const transformMatrix = new THREE.Matrix4();
 
   useFrame(() => {
@@ -172,47 +191,72 @@ const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
 
     for (let i = 0; i < totalBlocks; i++) {
 
-      const secondsOffsetForCurrentBlock = i / totalBlocks * animateDurationMillis
+      const millisOffsetForCurrentBlock = i / totalBlocks * animateDurationMillis
 
       let percentageOfAnimation = 0
 
-      if(elapsedMillisRef.current > secondsOffsetForCurrentBlock) {
-        const secondsDiffSinceBlockAnimationStart = elapsedMillisRef.current - secondsOffsetForCurrentBlock
+      if(elapsedMillisRef.current > millisOffsetForCurrentBlock) {
+        const secondsDiffSinceBlockAnimationStart = elapsedMillisRef.current - millisOffsetForCurrentBlock
         percentageOfAnimation = secondsDiffSinceBlockAnimationStart / singleBlockAnimationMillis
       }
 
-      if(percentageOfAnimation > 1) {
-        percentageOfAnimation = 1
+      if(percentageOfAnimation > 0.9) {
+        percentageOfAnimation = 0.9
       }
 
       transformMatrix.makeScale(percentageOfAnimation, percentageOfAnimation, percentageOfAnimation)
-      transformMatrix.setPosition(quantumBlocksArr[i].xCoord, 0, quantumBlocksArr[i].yCoord)
+      transformMatrix.setPosition(fourtyFiveBlocksArr[i].xCoord, 0, fourtyFiveBlocksArr[i].yCoord)
 
-      instanceRef.current.setMatrixAt(i, transformMatrix)
+      if(fourtyFiveBlocksArr[i].isOnOppositeQuadrant)
+        instanceRefOdd.current.setMatrixAt(i, transformMatrix)
+      else
+        instanceRefEven.current.setMatrixAt(i, transformMatrix)
     }
-    instanceRef.current.instanceMatrix.needsUpdate = true
+    instanceRefOdd.current.instanceMatrix.needsUpdate = true
+    instanceRefEven.current.instanceMatrix.needsUpdate = true
   })
 
   return (
-    <instancedMesh
-      ref={instanceRef}
-      args={[null, null, totalBlocks]}
-      onPointerOver={(e) => {
-        e.stopPropagation()
-        // console.log('onOver' + e.instanceId)
-      }}
-      onPointerOut={(e) => {
-        e.stopPropagation()
-        // console.log('onOut' + e.instanceId)
-      }}
-      onClick={(e) =>{
-        e.stopPropagation()
-        console.log('onClick: ' + e.instanceId)
-      }}
-    >
-      <boxBufferGeometry args={[1, 1, 1]} />
-      <meshMatcapMaterial />
-    </instancedMesh>
+    <>
+      <instancedMesh
+        ref={instanceRefOdd}
+        args={[null, null, totalBlocks]}
+        onPointerOver={(e) => {
+          e.stopPropagation()
+          // console.log('onOver' + e.instanceId)
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation()
+          // console.log('onOut' + e.instanceId)
+        }}
+        onClick={(e) =>{
+          e.stopPropagation()
+          console.log('onClick: ' + e.instanceId)
+        }}
+      >
+        <boxBufferGeometry args={[1, 1, 1]} />
+        <meshMatcapMaterial color="#dddddd" />
+      </instancedMesh>
+      <instancedMesh
+        ref={instanceRefEven}
+        args={[null, null, totalBlocks]}
+        onPointerOver={(e) => {
+          e.stopPropagation()
+          // console.log('onOver' + e.instanceId)
+        }}
+        onPointerOut={(e) => {
+          e.stopPropagation()
+          // console.log('onOut' + e.instanceId)
+        }}
+        onClick={(e) =>{
+          e.stopPropagation()
+          console.log('onClick: ' + e.instanceId)
+        }}
+      >
+        <boxBufferGeometry args={[1, 1, 1]} />
+        <meshMatcapMaterial color="#ddccaa" />
+      </instancedMesh>
+    </>
   )
 }
 
