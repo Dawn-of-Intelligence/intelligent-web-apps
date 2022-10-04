@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { useSpring, animated } from '@react-spring/three'
 import './PythagorasQuantized.css'
 import { /* useHelper, */ OrbitControls } from '@react-three/drei'
 import TheJewel from './TheJewel'
+import * as THREE from "three"
 
 const Plane = () => (
   <mesh
@@ -96,6 +97,123 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
   }
 
   return <>{quantumBlocksArr}</>
+}
+
+const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
+
+  const [isAnimationRunning, setIsAnimationRunning] = useState(true)
+  const elapsedMillisRef = useRef(0)
+  const animationStartTimeRef = useRef(0)
+  const animateDurationMillis = hypotenuseLength / 10 * 1000 + 700
+  const singleBlockAnimationMillis = hypotenuseLength / 20 * 1000 + 300
+
+  useEffect(()=> {
+    setIsAnimationRunning(true)
+    elapsedMillisRef.current = 0
+    animationStartTimeRef.current = Date.now()
+  }, [hypotenuseLength])
+
+  const quantumBlocksArr = [];
+
+  // Ahhhhhh, the Quantum Pythagorean Theorem !!!!!!!!!
+  const totalBlocks = hypotenuseLength * (hypotenuseLength - 1) * 2;
+
+  // Consider that each diagonal is a 2-for-1 which has an odd/even layer double stacked.
+  const doubleStackedHypotenuseLength = hypotenuseLength + hypotenuseLength - 1
+
+  let xCoord = hypotenuseLength -1;
+  let yCoord = 1;
+  let isOnShorterLayer = true;
+
+  for(let hypotenuseLayer = 0; hypotenuseLayer < doubleStackedHypotenuseLength; hypotenuseLayer++){
+    let currentDiagonalLength = (isOnShorterLayer ? hypotenuseLength - 1 : hypotenuseLength);
+    for(let currentDiagonal = 1; currentDiagonal <= currentDiagonalLength; currentDiagonal++) {
+
+      quantumBlocksArr.push(
+        {
+          xCoord,
+          yCoord,
+          baseColor: isOnShorterLayer ? '#FF6' : '#FA4',
+          hoverColor: isOnShorterLayer ? '#637' : '#835',
+        }
+      )
+
+      if(currentDiagonal === currentDiagonalLength) {
+        yCoord++
+      }
+      else if(isOnShorterLayer) {
+        xCoord--
+        yCoord++
+      }
+      else if(!isOnShorterLayer) {
+        xCoord++
+        yCoord--
+      }
+
+      if(currentDiagonal === currentDiagonalLength) {
+        isOnShorterLayer = !isOnShorterLayer
+      }
+    }
+  }
+
+  const instanceRef = useRef()
+  const transformMatrix = new THREE.Matrix4();
+
+  useFrame(() => {
+    if(!isAnimationRunning) {
+      return
+    }
+
+    elapsedMillisRef.current = Date.now() - animationStartTimeRef.current
+
+    if(elapsedMillisRef.current >= animateDurationMillis + singleBlockAnimationMillis) {
+      setIsAnimationRunning(false)
+    }
+
+    for (let i = 0; i < totalBlocks; i++) {
+
+      const secondsOffsetForCurrentBlock = i / totalBlocks * animateDurationMillis
+
+      let percentageOfAnimation = 0
+
+      if(elapsedMillisRef.current > secondsOffsetForCurrentBlock) {
+        const secondsDiffSinceBlockAnimationStart = elapsedMillisRef.current - secondsOffsetForCurrentBlock
+        percentageOfAnimation = secondsDiffSinceBlockAnimationStart / singleBlockAnimationMillis
+      }
+
+      if(percentageOfAnimation > 1) {
+        percentageOfAnimation = 1
+      }
+
+      transformMatrix.makeScale(percentageOfAnimation, percentageOfAnimation, percentageOfAnimation)
+      transformMatrix.setPosition(quantumBlocksArr[i].xCoord, 0, quantumBlocksArr[i].yCoord)
+
+      instanceRef.current.setMatrixAt(i, transformMatrix)
+    }
+    instanceRef.current.instanceMatrix.needsUpdate = true
+  })
+
+  return (
+    <instancedMesh
+      ref={instanceRef}
+      args={[null, null, totalBlocks]}
+      onPointerOver={(e) => {
+        e.stopPropagation()
+        // console.log('onOver' + e.instanceId)
+      }}
+      onPointerOut={(e) => {
+        e.stopPropagation()
+        // console.log('onOut' + e.instanceId)
+      }}
+      onClick={(e) =>{
+        e.stopPropagation()
+        console.log('onClick: ' + e.instanceId)
+      }}
+    >
+      <boxBufferGeometry args={[1, 1, 1]} />
+      <meshMatcapMaterial />
+    </instancedMesh>
+  )
 }
 
 const PronicSquareOrthogonal = ({isPointingUp, hypotenuseLength}) => {
@@ -197,7 +315,7 @@ const PythagorasQuantized3d = ({
   isBluntCorners,
   isDiagonalHypotenuse,
 }) => {
-  hypotenuseLength = parseInt(hypotenuseLength);
+  hypotenuseLength = parseInt(hypotenuseLength)
 
   return (
     <Canvas
@@ -223,7 +341,7 @@ const PythagorasQuantized3d = ({
       <CathetOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
       <PronicSquareOrthogonal isPointingUp={true} hypotenuseLength={hypotenuseLength} />
       <PronicSquareOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
-      <FourtyFiveDegreeSquare hypotenuseLength={hypotenuseLength} />
+      <FourtyFiveDegreeSquareInstanced hypotenuseLength={hypotenuseLength} />
       <Plane />
     </Canvas>
   )
