@@ -5,6 +5,7 @@ import './PythagorasQuantized.css'
 import { /* useHelper, */ OrbitControls } from '@react-three/drei'
 import TheJewel from './TheJewel'
 import * as THREE from "three"
+import { groutLinesShader } from '../../shaders/groutLinesShader'
 
 const Plane = () => (
   <mesh
@@ -13,7 +14,7 @@ const Plane = () => (
     receiveShadow
   >
     <planeBufferGeometry args={[500, 500]} />
-    <meshPhysicalMaterial color="white" />
+    <meshMatcapMaterial color="white" />
   </mesh>
 )
 
@@ -97,6 +98,24 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
   }
 
   return <>{quantumBlocksComponentArr}</>
+}
+
+const FourtyFiveDegreeGroutLines = ({hypotenuseLength}) => {
+  const ref = useRef()
+  useFrame(({ clock }) => {
+    ref.current.material.uniforms.u_time.value = clock.getElapsedTime()
+  })
+  return (
+    <mesh
+      ref={ref}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[hypotenuseLength -0.5, 0.38, hypotenuseLength-0.5]}
+      receiveShadow
+    >
+      <planeBufferGeometry args={[hypotenuseLength, hypotenuseLength]} />
+      <shaderMaterial attach="material" args={[groutLinesShader]} />
+    </mesh>
+  )
 }
 
 const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
@@ -219,6 +238,7 @@ const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
   return (
     <>
       <instancedMesh
+        castShadow
         ref={instanceRefOdd}
         args={[null, null, totalBlocks]}
         onPointerOver={(e) => {
@@ -305,7 +325,7 @@ const QuantumBlock = (props) => {
   })
 
   const scalePropsAfterDelay = useSpring({
-    scale: isActive ? [0.7, 0.7, 0.7] : [1, 1, 1],
+    scale: isActive ? [0.5, 0.5, 0.5] : [1, 1, 1],
   })
   const scalePropsBeforeDelay = useSpring({
     delay: props.delay,
@@ -365,11 +385,11 @@ const PythagorasQuantized3d = ({
     <Canvas
       className="Pythagoras-container-3d"
       camera={{ fov: 75, position: [0, 10, 0] }}
-      // shadows
+      shadows
     >
       <fog attach="fog" args={['white', 50, 120]} />    
       <SceneLights />
-      <TheJewel />
+      {/* <TheJewel /> */}
       <OrbitControls
         // autoRotate
         maxPolarAngle={Math.PI / 2.25}
@@ -386,6 +406,7 @@ const PythagorasQuantized3d = ({
       <PronicSquareOrthogonal isPointingUp={true} hypotenuseLength={hypotenuseLength} />
       <PronicSquareOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
       <FourtyFiveDegreeSquareInstanced hypotenuseLength={hypotenuseLength} />
+      <FourtyFiveDegreeGroutLines hypotenuseLength={hypotenuseLength} />
       <Plane />
     </Canvas>
   )
