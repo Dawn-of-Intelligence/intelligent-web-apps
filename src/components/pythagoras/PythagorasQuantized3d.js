@@ -103,7 +103,7 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
 const FourtyFiveDegreeGroutLines = ({hypotenuseLength}) => {
   const ref = useRef()
   useFrame(({ clock }) => {
-    ref.current.material.uniforms.u_time.value = clock.getElapsedTime()
+    ref.current.material.uniforms.iTime.value = clock.getElapsedTime()
   })
   return (
     <mesh
@@ -119,7 +119,6 @@ const FourtyFiveDegreeGroutLines = ({hypotenuseLength}) => {
 }
 
 const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
-
   const [isAnimationRunning, setIsAnimationRunning] = useState(true)
   const elapsedMillisRef = useRef(0)
   const animationStartTimeRef = useRef(0)
@@ -380,7 +379,6 @@ const PythagorasQuantized3d = ({
   isDiagonalHypotenuse,
 }) => {
   hypotenuseLength = parseInt(hypotenuseLength)
-
   return (
     <Canvas
       className="Pythagoras-container-3d"
@@ -412,4 +410,4 @@ const PythagorasQuantized3d = ({
   )
 }
 
-export default PythagorasQuantized3d
+export default React.memo(PythagorasQuantized3d)
