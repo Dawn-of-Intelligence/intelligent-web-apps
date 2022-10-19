@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useSpring, animated } from '@react-spring/three'
+import { useSpring, animated, a } from '@react-spring/three'
 import './PythagorasQuantized.css'
 import { /* useHelper, */ OrbitControls } from '@react-three/drei'
 import TheJewel from './TheJewel'
@@ -101,20 +101,109 @@ const FourtyFiveDegreeSquare = ({hypotenuseLength}) => {
 }
 
 const FourtyFiveDegreeGroutLines = ({hypotenuseLength}) => {
-  const ref = useRef()
+  const meshRef = useRef()
+
+  var shape = new THREE.Shape()
+
+  const zigZags = hypotenuseLength + hypotenuseLength -3
+  const fractionalMargin = 0.07
+  const onePlusMargin = 1 + fractionalMargin
+
+  // Start from the EAST equator and create the blunt corners.
+  const firstStopEastX = hypotenuseLength - onePlusMargin
+  const firstStopEastY = -1 + fractionalMargin
+  shape.moveTo(firstStopEastX, firstStopEastY)
+  const lastStopEastX = hypotenuseLength - onePlusMargin
+  const lastStopEastY = 1 - fractionalMargin
+  shape.lineTo(lastStopEastX, lastStopEastY)
+
+  let xCoord = lastStopEastX
+  let yCoord = lastStopEastY
+
+  for(let i = 0; i < zigZags; i++) {
+    if(i % 2 === 0)
+      xCoord -= 1
+    if(i % 2 !== 0)
+      yCoord += 1
+    shape.lineTo(xCoord, yCoord)
+  }
+
+  // North pole
+  shape.lineTo(1 - fractionalMargin, hypotenuseLength - onePlusMargin)
+  const lastStopNorthX = -1 + fractionalMargin
+  const lastStopNorthY = hypotenuseLength - onePlusMargin
+  shape.lineTo(lastStopNorthX, lastStopNorthY)
+
+  xCoord = lastStopNorthX
+  yCoord = lastStopNorthY
+
+  for(let i = 0; i < zigZags; i++) {
+    if(i % 2 !== 0)
+      xCoord -= 1
+    if(i % 2 === 0)
+      yCoord -= 1
+    shape.lineTo(xCoord, yCoord)
+  }
+
+  // West equator
+  shape.lineTo(-hypotenuseLength + onePlusMargin, 1)
+  const lastStopWestX = -hypotenuseLength + onePlusMargin
+  const lastStopWestY = -1 + fractionalMargin
+  shape.lineTo(lastStopWestX, lastStopWestY)
+
+  xCoord = lastStopWestX
+  yCoord = lastStopWestY
+
+  for(let i = 0; i < zigZags; i++) {
+    if(i % 2 === 0)
+      xCoord += 1
+    if(i % 2 !== 0)
+      yCoord -= 1
+    shape.lineTo(xCoord, yCoord)
+  }
+
+  // South pole
+  shape.lineTo(-1, -hypotenuseLength + onePlusMargin)
+  const lastStopSouthX = 1 - fractionalMargin
+  const lastStopSouthY = -hypotenuseLength + onePlusMargin
+  shape.lineTo(lastStopSouthX, lastStopSouthY)
+
+  xCoord = lastStopSouthX
+  yCoord = lastStopSouthY
+
+  for(let i = 0; i < zigZags; i++) {
+    if(i % 2 !== 0)
+      xCoord += 1
+    if(i % 2 === 0)
+      yCoord += 1
+    shape.lineTo(xCoord, yCoord)
+  }
+
+  // Return to the bottom blunt corner of the East equator.
+  shape.lineTo(firstStopEastX, firstStopEastY)
+
   useFrame(({ clock }) => {
-    ref.current.material.uniforms.iTime.value = clock.getElapsedTime()
+    meshRef.current.material.uniforms.iTime.value = clock.getElapsedTime()
   })
   return (
     <mesh
-      ref={ref}
+      ref={meshRef}
       rotation={[-Math.PI / 2, 0, 0]}
       position={[hypotenuseLength -0.5, 0.38, hypotenuseLength-0.5]}
       receiveShadow
     >
-      <planeBufferGeometry args={[hypotenuseLength, hypotenuseLength]} />
-      <shaderMaterial attach="material" args={[groutLinesShader]} />
+      <shapeBufferGeometry args={[shape]} />
+      <shaderMaterial attach="material" args={[groutLinesShader]} side={THREE.DoubleSide} />
     </mesh>
+  )
+}
+
+const FourtyFiveDegreeGroutLinesAnimated = ({hypotenuseLength}) => {
+  const { y } = useSpring({ y: 0, from: { y: -3 }, reset: true })
+  return (
+    <a.group position-y={y}>
+      <FourtyFiveDegreeGroutLines hypotenuseLength={hypotenuseLength} />
+    </a.group>
   )
 }
 
@@ -124,6 +213,7 @@ const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
   const animationStartTimeRef = useRef(0)
   const animateDurationMillis = hypotenuseLength / 10 * 1000 + 700
   const singleBlockAnimationMillis = hypotenuseLength / 20 * 1000 + 300
+  const cubeScale = 0.9
 
   useEffect(()=> {
     setIsAnimationRunning(true)
@@ -218,8 +308,8 @@ const FourtyFiveDegreeSquareInstanced = ({hypotenuseLength}) => {
         percentageOfAnimation = secondsDiffSinceBlockAnimationStart / singleBlockAnimationMillis
       }
 
-      if(percentageOfAnimation > 0.9) {
-        percentageOfAnimation = 0.9
+      if(percentageOfAnimation > cubeScale) {
+        percentageOfAnimation = cubeScale
       }
 
       transformMatrix.makeScale(percentageOfAnimation, percentageOfAnimation, percentageOfAnimation)
@@ -387,7 +477,7 @@ const PythagorasQuantized3d = ({
     >
       <fog attach="fog" args={['white', 50, 120]} />    
       <SceneLights />
-      {/* <TheJewel /> */}
+      <TheJewel />
       <OrbitControls
         // autoRotate
         maxPolarAngle={Math.PI / 2.25}
@@ -398,13 +488,13 @@ const PythagorasQuantized3d = ({
        />
 
 
-      <HypotenuseOrthogonal hypotenuseLength={hypotenuseLength} />
+      {/* <HypotenuseOrthogonal hypotenuseLength={hypotenuseLength} /> */}
       <CathetOrthogonal isPointingUp={true} hypotenuseLength={hypotenuseLength} />
       <CathetOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
       <PronicSquareOrthogonal isPointingUp={true} hypotenuseLength={hypotenuseLength} />
       <PronicSquareOrthogonal isPointingUp={false} hypotenuseLength={hypotenuseLength} />
       <FourtyFiveDegreeSquareInstanced hypotenuseLength={hypotenuseLength} />
-      <FourtyFiveDegreeGroutLines hypotenuseLength={hypotenuseLength} />
+      <FourtyFiveDegreeGroutLinesAnimated hypotenuseLength={hypotenuseLength} />
       <Plane />
     </Canvas>
   )
