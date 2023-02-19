@@ -1,102 +1,4 @@
-const strLengthMaxSafeInteger = Number.MAX_SAFE_INTEGER.toString().length -1;
-const maxArrayLength = Math.pow(2, 32) -1;
-
-function findAllPerfectSquaresWithinRange(maxItteration = maxArrayLength) {
-  const allPerfectSquaresWithinRange = [];
-
-  let currentIteration = 1;
-  while(true) {
-    if(currentIteration > maxItteration) {
-      console.log('Breaking out of findAllPerfectSquaresWithinRange because iteration is ' + currentIteration + ' Square: ' + BigInt(currentIteration)**2n);
-      break;
-    }
-    allPerfectSquaresWithinRange.push(
-      {
-        root: currentIteration,
-        square: BigInt(currentIteration)**2n,
-      }
-    );
-    currentIteration++;
-  }
-
-  return allPerfectSquaresWithinRange;
-}
-
-function convertNumberToBigIntIfNeeded(theNumber) {
-  if(typeof theNumber === 'bigint') {
-    return theNumber;
-  }
-  return BigInt(theNumber);
-}
-
-function stringifyArrayOfBigIntObjects(key, value) {
-  if(value === 'object'){
-    return value;
-  } else if(typeof value === 'bigint') {
-    return value.toString();
-  } else {
-    return value;
-  }
-}
-
-
-// Too many performance optimizations needed for this.... I'll just stick to plain old numbers to explore the landscape for now.
-function findSpecialSquaresBigInt(squareScale, isScaleMultiplication, offset, maxItteration = maxArrayLength) {
-
-  const allPerfectSquaresWithinRange = findAllPerfectSquaresWithinRange(maxItteration);
-
-  const objArr = [];
-
-  let iteration = 1;
-  while(true) {
-
-    if(iteration > maxItteration) {
-      break;
-    }
-
-    const loopSquared = BigInt(iteration)**2n;
-
-    let loopSquareScaled;
-    if(isScaleMultiplication) {
-      loopSquareScaled = loopSquared * BigInt(squareScale);
-    } else {
-
-      // Ensure that the number can be divided without a remainder before consideration as a special square.
-      if(loopSquared % BigInt(squareScale) !== 0n) {
-        iteration++;
-        continue;
-      }
-      loopSquareScaled = loopSquared / BigInt(squareScale);
-    }
-    const squareScaledWithOffset = loopSquareScaled + BigInt(offset);
-
-    // A square root can't be performed on BigInt, so instead just find out if any of the known perfect squares within range match.
-    for(let n = 0; n < allPerfectSquaresWithinRange.length; n++) {
-      if(allPerfectSquaresWithinRange[n].square === squareScaledWithOffset) {
-        objArr.push(
-        {
-          iteration,
-          squareScale,
-          isScaleMultiplication,
-          offset,
-          squareScaledWithOffset,
-          squareRoot: allPerfectSquaresWithinRange[n].root,
-        });
-        break;
-      }
-      if(BigInt(allPerfectSquaresWithinRange[n].square) > squareScaledWithOffset){
-        break;
-      }
-    };
-
-    iteration++;
-  }
-  return objArr;
-}
-
-
-
-function findSpecialSquares(squareScale, isScaleMultiplication, offset, maxItteration = Number.MAX_SAFE_INTEGER) {
+export function findSpecialSquares(squareScale, isScaleMultiplication, offset, maxItteration = Number.MAX_SAFE_INTEGER) {
   const objArr = [];
   for(let i=0; i<maxItteration; i++) {
     const loopSquare = i * i;
@@ -132,7 +34,7 @@ function findSpecialSquares(squareScale, isScaleMultiplication, offset, maxItter
   return objArr;
 }
 
-function findSpecialPronics(pronicScale, isScaleMultiplication, offset, maxItteration = Number.MAX_SAFE_INTEGER) {
+export function findSpecialPronics(pronicScale, isScaleMultiplication, offset, maxItteration = Number.MAX_SAFE_INTEGER) {
   const objArr = [];
   for(let i=0; i<maxItteration; i++) {
     const loopPronic = i * (i+1);
@@ -235,6 +137,15 @@ function categorizeSpecialPronicsCollection (specialPronicsArr) {
   if(foundPerfectPronicFactorA && foundPerfectPronicFactorBafterPronicA) {
     oscillates = true;
   }
+
+  const ratiosBetweenItterrations = [];
+  forEach((specialPronicsArr, index) => {
+    if(index > 0) {
+      if(specialPronicsArr[index] && oscillates) {
+        
+      }
+    }
+  })
 
   return {
     pronicScale: specialPronicsArr[0].pronicScale,

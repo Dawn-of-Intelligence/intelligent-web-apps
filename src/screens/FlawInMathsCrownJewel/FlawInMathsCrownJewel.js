@@ -3,6 +3,8 @@ import './FlawInMathsCrownJewel.css'
 import { useSpring, animated } from '@react-spring/web'
 import { useIntersectionObserver } from '../../hooks/animationHooks'
 import PythagorasQuantized3d from '../../components/pythagoras/PythagorasQuantized3d'
+import SpecialSquares from '../../components/pythagoras/SpecialSquares'
+import ScrollIndicator from '../../components/controls/ScrollIndicator'
 import { Stats } from '@react-three/drei'
 
 const FlawInMathsCrownJewel = () => {
@@ -40,8 +42,18 @@ const FlawInMathsCrownJewel = () => {
         </div>
         <PythagorasQuantized3d hypotenuseLength={hypotenuseLength} />
       </div>
-      <div className="Pythagoras-header">
-        A Flaw in Math's Crown Jewel, and the Opportunity
+
+      <ScrollIndicator />
+
+      <div className="Pythagoras-specialSquares">
+        <div style={{height: '1px'}}></div>
+
+        <h2>Points of Disection (Using a Fixed Divisor) Exist at Quasi Predictable Postitions Across all Squares, Ad Infinitum</h2>
+
+ 
+        <div><SpecialSquares /></div>
+
+
       </div>
       <div className="Pythagorean-container" ref={triggerScrollRef}>
         <animated.div style={midWindowSpring}>

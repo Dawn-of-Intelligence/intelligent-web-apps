@@ -1,0 +1,12 @@
+.Spirals-container {
+  text-align: center;
+  width: 100vw;
+}
+
+.Spirals-header {
+  background-color: #282c34;
+  padding: 20px;
+  align-items: center;
+  font-size: 35px;
+  color: white;
+}

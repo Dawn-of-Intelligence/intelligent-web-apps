@@ -3,6 +3,7 @@ import { Route, BrowserRouter, Routes, } from 'react-router-dom'
 import Layout from './screens/Layout'
 import FlawInMathsCrownJewel from './screens/FlawInMathsCrownJewel/FlawInMathsCrownJewel'
 import Home from './screens/Home/Home'
+import Spirals from './screens/Spirals/Spirals'
 
 // There is a bug when including @react-spring/web and @react-spring/three together.
 // See: https://github.com/pmndrs/react-spring/issues/1586
@@ -17,6 +18,7 @@ const App = () => (
 			<Routes>
 				<Route path="/" element={<Home />} />
 				<Route path="/flaw-in-maths-crown-jewel" element={<FlawInMathsCrownJewel />} />
+				<Route path="/number-spirals" element={<Spirals />} />
 			</Routes>
 		</Layout>
 	</BrowserRouter>

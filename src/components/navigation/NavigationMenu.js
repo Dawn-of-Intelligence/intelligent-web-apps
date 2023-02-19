@@ -11,6 +11,7 @@ const NavigationMenu = (props) => {
 	const navEntries = [
 		{ title: 'Home', location: '/' },
 		{ title: `A Flaw in Math's Crown Jewel`, location: '/flaw-in-maths-crown-jewel' },
+		{ title: `Number Spirals`, location: '/number-spirals' },
 	];
 
 	const filteredNavEntriesBySearchTerm = () => navEntries.filter((loopNavEntry) =>

@@ -1,0 +1,6 @@
+.Scroll-indicator {
+  height: 15vh;
+  background-color: #121316;
+  display: flex;
+  align-items: 'center';
+}
