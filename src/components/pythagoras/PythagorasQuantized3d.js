@@ -23,11 +23,11 @@ const CathetOrthogonal = ({isPointingUp, hypotenuseLength}) => {
     return null
   return (
     <>
-      {[...Array(hypotenuseLength -2)].map((_, cathetNumber) =>
+      {[...Array(hypotenuseLength -1)].map((_, cathetNumber) =>
         <QuantumBlock
           key={'cathet' + cathetNumber + (isPointingUp ? 'y' : 'n') + 'length' + hypotenuseLength}
           position={[(isPointingUp ? (cathetNumber + 1) : 0), 0, (!isPointingUp ? (cathetNumber + 1) : 0)]}
-          baseColor={cathetNumber % 2 === 0 ? '#CCC' : '#ABE'}
+          baseColor={cathetNumber % 2 === 0 ? '#666' : '#777'}
           hoverColor={cathetNumber % 2 === 0 ? 'hotpink' : 'teal'}
           delay={600 * cathetNumber}
         />
@@ -375,13 +375,37 @@ const PronicSquareOrthogonal = ({isPointingUp, hypotenuseLength}) => {
   const getCoordinateX = (blckNum) => isPointingUp ? (getColumnNumFromBlockNum(blckNum) * -1 - 1) : (blckNum - getColumnNumFromBlockNum(blckNum) * hypotenuseLength)
   const getCoordinateY = (blckNum) => isPointingUp ? (blckNum - getColumnNumFromBlockNum(blckNum) * hypotenuseLength) : (getColumnNumFromBlockNum(blckNum) * -1 - 1)
   
+  const colorA = '#66A';
+  const colorB = '#369';
+
+  const getColorPronicBlock = (blockNumber) => {
+    if(isPointingUp) {
+      if(hypotenuseLength % 2 === 0) {
+        if(getCoordinateX(blockNumber) % 2 === 0) {
+          return blockNumber % 2 === 0 ? colorA : colorB;
+        }
+        return blockNumber % 2 !== 0 ? colorA : colorB;
+      }
+      return blockNumber % 2 !== 0 ? colorA : colorB
+    }
+    else {
+      if(hypotenuseLength % 2 === 0) {
+        if(getCoordinateY(blockNumber) % 2 === 0) {
+          return blockNumber % 2 === 0 ? colorA : colorB;
+        }
+        return blockNumber % 2 !== 0 ? colorA : colorB;
+      }
+      return blockNumber % 2 !== 0 ? colorA : colorB
+    }
+  }
+
   return (
     <>
       {[...Array(totalBlocks)].map((_, blockNumber) =>
         <QuantumBlock
           key={'Pronic' + blockNumber + (isPointingUp ? 'y' : 'n') + 'totalBlocks' + totalBlocks}
           position={[getCoordinateX(blockNumber), 0, getCoordinateY(blockNumber)]}
-          baseColor={blockNumber % 2 === 0 ? '#66A' : '#369'}
+          baseColor={getColorPronicBlock(blockNumber)}
           hoverColor={blockNumber % 2 === 0 ? 'hotpink' : '#F63'}
           delay={160 * blockNumber}
         />
